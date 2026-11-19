@@ -1,40 +1,40 @@
 # Firmware `cism216.fw`
 
-Este repositorio **no incluye** `cism216.fw`. Es firmware propietario de
-Plustek y no se redistribuye sin permiso.
+This repository **does not include** `cism216.fw`. It is proprietary Plustek
+firmware and is not redistributed without permission.
 
-## Cómo obtenerlo
+## How to obtain it
 
-Extrae `cism216.fw` de un instalador oficial de Plustek OpticSlim M12 o de
-IRIScan Express 2 que corresponda a tu escáner. No uses firmware de otro
-modelo ni de sitios no oficiales.
+Extract `cism216.fw` from an official Plustek OpticSlim M12 or IRIScan Express 2
+installer that matches your scanner. Do not use firmware from a different model
+or from unofficial sources.
 
-- Nombre esperado: `cism216.fw`
-- Tamaño: **8192 bytes**
-- SHA-256 de la copia usada en la prueba:
+- Expected name: `cism216.fw`
+- Size: **8192 bytes**
+- SHA-256 of the copy used in testing:
   `9730A258DC7152184A9C4FB7C8D12ABB3B4DE537276F4686525BEB6A72F98C15`
 
-Verifica el tamaño antes de usarlo:
+Verify the size before using it:
 
 ```bat
 for %F in (cism216.fw) do @echo %~zF
 ```
 
-Debe imprimir `8192`.
+It should print `8192`.
 
-## Dónde colocarlo
+## Where to place it
 
-Puedes dejarlo en una de estas rutas antes de ejecutar `install.cmd`:
+You can place it in any of these paths before running `install.cmd`:
 
 ```
 cism216.fw
 firmware\cism216.fw
-..\pkg\cab_extract\cism216.fw   (estructura usada por el autor)
+..\pkg\cab_extract\cism216.fw   (structure used by the author)
 ```
 
-`install.cmd` lo copia a `%SystemRoot%\twain_32\Color USB Scanner\`.
+`install.cmd` copies it to `%SystemRoot%\twain_32\Color USB Scanner\`.
 
-## Aviso
+## Warning
 
-Si el firmware no es el correcto, la subida puede fallar y el escáner puede
-quedar en un estado inconsistente. No desconectes el USB durante la subida.
+If the firmware is not the correct one, the upload may fail and the scanner may
+be left in an inconsistent state. Do not disconnect the USB during the upload.
