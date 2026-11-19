@@ -8,8 +8,8 @@
  *   - Transferencia de imagen por memoria (DAT_IMAGEMEMXFER).
  *   - Imagen sintética de prueba si COLORUSBSCANNER_TEST_PATTERN=1.
  *
- * La lectura real del escáner está en gt68xx_proto.c y todavía es un
- * esqueleto: hay que portar el protocolo del backend SANE gt68xx.
+ * La lectura real del escáner está en gt68xx_proto.c: firmware, motor y
+ * lectura bulk portados del backend SANE gt68xx.
  */
 #include <windows.h>
 #include <stdarg.h>

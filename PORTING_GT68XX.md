@@ -1,7 +1,8 @@
 # Portar el backend SANE `gt68xx` al Data Source TWAIN
 
-Este documento mapea el código de SANE con el esqueleto de `ColorUSBScanner.ds`
-y explica qué falta para escanear de verdad.
+Este documento mapea el código de SANE con la implementación de
+`ColorUSBScanner.ds` y explica qué falta para completar la calidad de
+producción (calibración de sombreado).
 
 Estado del port (19/11/2026):
 

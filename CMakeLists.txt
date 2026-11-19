@@ -38,7 +38,7 @@ if(MSVC)
         "/DEF:${CMAKE_CURRENT_SOURCE_DIR}/src/ColorUSBScanner.def")
     target_compile_options(ColorUSBScanner PRIVATE /W3)
 else()
-    # MinGW: el símbolo es _DS_Entry@16; --kill-at exporta DS_Entry.
+    # MinGW: el símbolo es _DS_Entry@20; --kill-at exporta DS_Entry.
     target_link_options(ColorUSBScanner PRIVATE "-Wl,--kill-at")
     target_compile_options(ColorUSBScanner PRIVATE -Wall -Wextra)
 endif()
