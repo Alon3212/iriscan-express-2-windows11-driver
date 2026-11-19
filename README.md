@@ -1,25 +1,25 @@
-# ColorUSBScanner.ds — Data Source TWAIN para Plustek OpticSlim M12 / IRIScan Express 2
+# ColorUSBScanner.ds — TWAIN Data Source for Plustek OpticSlim M12 / IRIScan Express 2
 
-- **Hardware probado:** USB `VID_07B3&PID_0412`, chipset **GT-6816**.
-- **DS:** 32 bits, `%SystemRoot%\twain_32\Color USB Scanner\ColorUSBScanner.ds`.
-- **Cliente probado:** NAPS2 7.5.3 **32 bits** (TWAIN).
-- **Estado:** escaneo real confirmado en Windows 11: **A4, 300 dpi, color, 2480×3508**.
+- **Tested hardware:** USB `VID_07B3&PID_0412`, **GT-6816** chipset.
+- **DS:** 32-bit, `%SystemRoot%\twain_32\Color USB Scanner\ColorUSBScanner.ds`.
+- **Tested client:** NAPS2 7.5.3 **32-bit** (TWAIN).
+- **Status:** Real scan confirmed on Windows 11: **A4, 300 dpi, color, 2480×3508**.
 
 ---
 
-## Inicio rápido
+## Quick Start
 
-Para usar el escáner en otro PC:
+To use the scanner on another PC:
 
-1. Consigue `libusb-1.0.dll` **de 32 bits** (probado con **libusb 1.0.30**, build MinGW32).
-2. Consigue `cism216.fw` (8192 bytes) extrayéndolo de un instalador oficial de Plustek/IRIScan. **No se redistribuye** en este repositorio.
-3. Coloca ambos junto a este README, en `third_party\libusb\` o en `firmware\`.
-4. Ejecuta `install.cmd` **como Administrador**.
-5. Con **Zadig 2.9**, enlaza `07B3:0412` a **WinUSB**.
-6. Abre NAPS2 **32 bits**, crea un perfil **TWAIN**, selecciona **Color USB Scanner**, **Color**, **300 dpi**, A4.
-7. Comprueba con `scan_real.cmd` o escanea desde NAPS2.
+1. Get `libusb-1.0.dll` **32-bit** (tested with **libusb 1.0.30**, MinGW32 build).
+2. Get `cism216.fw` (8192 bytes) by extracting it from an official Plustek/IRIScan installer. **Not redistributed** in this repository.
+3. Place both files next to this README, in `third_party\libusb\` or in `firmware\`.
+4. Run `install.cmd` **as Administrator**.
+5. With **Zadig 2.9**, bind `07B3:0412` to **WinUSB**.
+6. Open NAPS2 **32-bit**, create a **TWAIN** profile, select **Color USB Scanner**, **Color**, **300 dpi**, A4.
+7. Test with `scan_real.cmd` or scan from NAPS2.
 
-Si solo quieres validar la instalación TWAIN sin hardware:
+If you only want to validate the TWAIN installation without hardware:
 
 ```bat
 set COLORUSBSCANNER_TEST_PATTERN=1
@@ -28,115 +28,115 @@ test_pattern.cmd
 
 ---
 
-## Estado y validación real
+## Status and Real Validation
 
-Probado con:
+Tested with:
 
 - **Windows 11**
-- **NAPS2 7.5.3 de 32 bits**, driver TWAIN
+- **NAPS2 7.5.3 32-bit**, TWAIN driver
 - USB **`07B3:0412`**
-- **libusb 1.0.30** (32 bits, MinGW32)
+- **libusb 1.0.30** (32-bit, MinGW32)
 - **Zadig 2.9**
-- Firmware `cism216.fw` de 8192 bytes
-- Resultado: página **A4**, **300 dpi**, **color**, imagen **2480×3508**, legible.
+- Firmware `cism216.fw` 8192 bytes
+- Result: **A4** page, **300 dpi**, **color**, image **2480×3508**, legible.
 
-La imagen real de prueba no se publica por privacidad. El registro de la prueba y los datos técnicos están en [`docs/VALIDATION.md`](docs/VALIDATION.md).
+The actual test image is not published for privacy reasons. The test log and technical data are in [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
-También está validada la integración TWAIN sin hardware con una imagen sintética:
+TWAIN integration without hardware has also been validated using a synthetic image:
 
-- Gris 100 dpi: 827×1169, PDF de ~36 KB.
-- Color 300 dpi: 2480×3508, PDF de ~243 KB (`test_color_300.pdf`).
+- Grayscale 100 dpi: 827×1169, PDF ~36 KB.
+- Color 300 dpi: 2480×3508, PDF ~243 KB (`test_color_300.pdf`).
 
-> NAPS2 7.5.3 puede imprimir una `ArgumentNullException` no fatal después de
-> “Scanned page 1”. En la prueba el PDF se generó correctamente; el problema
-> está en el procesado de imagen de NAPS2, no en la transferencia TWAIN.
+> NAPS2 7.5.3 may print a non-fatal `ArgumentNullException` after
+> "Scanned page 1". In testing the PDF was generated correctly; the issue
+> is in NAPS2's image processing, not in the TWAIN transfer.
 
-**Importante:** el escaneo real está probado con **color 300 dpi y A4**. Otras
-resoluciones y modos no están validados todavía.
-
----
-
-## Hardware y compatibilidad
-
-- **Soportado/probado:** `07B3:0412` (Plustek OpticSlim M12; unidad reportada también como IRIScan Express 2).
-- **No soportado por el código actual:** `07B3:045F`. En la tabla de SANE ese ID corresponde a `iriscan_express_2_model`; este DS solo busca `0412`. Si tu unidad es `045F`, no funcionará sin añadir ese ID/modelo.
-- El M12 es **sheet-fed** (alimentación hoja a hoja), **CIS**, sin dúplex.
-- El DS es **32 bits**: úsalo desde NAPS2 32 bits u otra aplicación TWAIN de 32 bits. Las aplicaciones de 64 bits no cargan un `.ds` de 32 bits.
+**Important:** real scanning has only been tested with **color 300 dpi and A4**. Other
+resolutions and modes have not yet been validated on hardware.
 
 ---
 
-## Requisitos y dependencias
+## Hardware and Compatibility
 
-### 1. libusb 1.0.30 de 32 bits
+- **Supported/tested:** `07B3:0412` (Plustek OpticSlim M12; unit also reported as IRIScan Express 2).
+- **Not supported by current code:** `07B3:045F`. In the SANE table that ID corresponds to `iriscan_express_2_model`; this DS only searches for `0412`. If your unit is `045F`, it will not work without adding that ID/model.
+- The M12 is **sheet-fed**, **CIS**, no duplex.
+- The DS is **32-bit**: use it from NAPS2 32-bit or another 32-bit TWAIN application. 64-bit applications cannot load a 32-bit `.ds`.
 
-El DS carga `libusb-1.0.dll` de forma dinámica desde su propia carpeta. No se
-linkea contra `libusb-1.0.lib`.
+---
 
-- Versión probada: **libusb 1.0.30**, build **MinGW32**.
-- Descarga oficial: <https://github.com/libusb/libusb/releases>
-- Alternativa MSYS2: paquete `mingw-w64-i686-libusb` (versión 1.0.x de 32 bits).
-- Debe ser **32 bits**. Una DLL de 64 bits no se puede cargar en el DS.
-- Si tu build de MinGW32 depende de `libwinpthread-1.dll` u otras DLLs de
-  runtime, cópialas también junto al `.ds`.
+## Requirements and Dependencies
 
-Colócala en una de estas rutas:
+### 1. libusb 1.0.30 32-bit
+
+The DS loads `libusb-1.0.dll` dynamically from its own folder. It does not
+link against `libusb-1.0.lib`.
+
+- Tested version: **libusb 1.0.30**, **MinGW32** build.
+- Official download: <https://github.com/libusb/libusb/releases>
+- MSYS2 alternative: `mingw-w64-i686-libusb` package (32-bit 1.0.x version).
+- Must be **32-bit**. A 64-bit DLL cannot be loaded by the DS.
+- If your MinGW32 build depends on `libwinpthread-1.dll` or other runtime DLLs,
+  copy those alongside the `.ds` as well.
+
+Place it in one of these paths:
 
 ```
 libusb-1.0.dll
 third_party\libusb\libusb-1.0.dll
 ```
 
-`install.cmd` la copia a `%SystemRoot%\twain_32\Color USB Scanner\` si la
-encuentra. Si no aparece, el modo de prueba seguirá funcionando, pero el
-escaneo real fallará al abrir USB.
+`install.cmd` copies it to `%SystemRoot%\twain_32\Color USB Scanner\` if
+found. If it is missing, test mode will still work, but real scanning will fail
+when opening USB.
 
 ### 2. Firmware `cism216.fw`
 
-El firmware **no se redistribuye** en este repositorio: es firmware propietario
-de Plustek. Debes extraerlo de un instalador oficial de Plustek/IRIScan que
-corresponda a tu escáner.
+The firmware **is not redistributed** in this repository: it is proprietary
+Plustek firmware. You must extract it from an official Plustek/IRIScan installer
+for your scanner.
 
-- Nombre: `cism216.fw`
-- Tamaño esperado: **8192 bytes**
-- SHA-256 de la copia usada en la prueba:
+- Name: `cism216.fw`
+- Expected size: **8192 bytes**
+- SHA-256 of the copy used in testing:
   `9730A258DC7152184A9C4FB7C8D12ABB3B4DE537276F4686525BEB6A72F98C15`
-- Colócalo en la raíz del proyecto, en `firmware\` o deja que `install.cmd` lo
-  busque en `..\pkg\cab_extract\` si conservas esa estructura.
+- Place it in the project root, in `firmware\`, or let `install.cmd` find it
+  in `..\pkg\cab_extract\` if you keep that structure.
 
-Ver [`firmware/README.md`](firmware/README.md) para instrucciones y aviso legal.
+See [`firmware/README.md`](firmware/README.md) for instructions and legal notice.
 
-### 3. Zadig 2.9 y WinUSB
+### 3. Zadig 2.9 and WinUSB
 
-El DS usa libusb, así que el escáner **no puede estar enlazado a `usbscan.sys`**
-(el driver de Plustek). Con **Zadig 2.9**:
+The DS uses libusb, so the scanner **must not be bound to `usbscan.sys`**
+(the Plustek driver). With **Zadig 2.9**:
 
-1. Abre Zadig como Administrador.
+1. Open Zadig as Administrator.
 2. **Options → List All Devices**.
-3. Selecciona `07B3 0412` (“600dpi USB Scanner”).
-4. En el cuadro de driver elige **WinUSB** (o libusbK).
-5. Pulsa **Replace Driver** / **Install Driver**.
-6. Desconecta y reconecta el escáner.
+3. Select `07B3 0412` ("600dpi USB Scanner").
+4. In the driver box choose **WinUSB** (or libusbK).
+5. Click **Replace Driver** / **Install Driver**.
+6. Unplug and replug the scanner.
 
-Para volver al driver original, usa **Zadig → Restore Default Driver** o
-reinstala el INF de Plustek. Ver [Desinstalar y restaurar](#desinstalar-y-restaurar).
+To revert to the original driver, use **Zadig → Restore Default Driver** or
+reinstall the Plustek INF. See [Uninstall and Restore](#uninstall-and-restore).
 
-> Zadig sustituye el driver del dispositivo. Esto puede hacer que deje de
-> funcionar la app “Escáner” de Windows/WIA y el software original de Plustek.
-> Hazlo solo si aceptas ese cambio y ten a mano el instalador original.
+> Zadig replaces the device driver. This may break the Windows "Scanner" app/WIA
+> and the original Plustek software.
+> Only do this if you accept that change and have the original installer at hand.
 
-### 4. Compilador (solo si compilas desde fuente)
+### 4. Compiler (only if building from source)
 
-- **MinGW-w64 i686** (`i686-w64-mingw32-gcc`), o
-- **Visual Studio 2022** con plataforma **Win32** (no verificado en esta revisión).
+- **MinGW-w64 i686** (`i686-w64-mingw32-gcc`), or
+- **Visual Studio 2022** with **Win32** platform (not verified in this revision).
 
-El proyecto incluye las cabeceras `twain.h` y `libusb.h`; no necesitas el SDK
-de TWAIN ni linkear libusb.
+The project includes `twain.h` and `libusb.h` headers; you do not need the
+TWAIN SDK or to link libusb.
 
 ---
 
-## Compilar
+## Building
 
-### MinGW-w64 de 32 bits
+### MinGW-w64 32-bit
 
 ```bat
 cmake -S . -B build -G "MinGW Makefiles" ^
@@ -144,16 +144,16 @@ cmake -S . -B build -G "MinGW Makefiles" ^
 cmake --build build
 ```
 
-o, sin CMake:
+or, without CMake:
 
 ```bat
 make -f Makefile.mingw
 ```
 
-El resultado es `ColorUSBScanner.ds` (PE32).
+The output is `ColorUSBScanner.ds` (PE32).
 
-> En `cmd.exe` la continuación de línea es `^`. Si usas PowerShell, usa una
-> sola línea o el carácter de continuación de PowerShell.
+> In `cmd.exe` the line continuation character is `^`. If you use PowerShell,
+> use a single line or PowerShell's continuation character.
 
 ### Visual Studio 2022 (Win32)
 
@@ -162,80 +162,80 @@ cmake -S . -B build-vs -G "Visual Studio 17 2022" -A Win32
 cmake --build build-vs --config Release
 ```
 
-El `.ds` queda en `build-vs\Release\ColorUSBScanner.ds`.
+The `.ds` will be at `build-vs\Release\ColorUSBScanner.ds`.
 
-> La ruta de Visual Studio no está verificada en la prueba original. Si vas a
-> publicar un binario, comprueba con `dumpbin /exports` que aparece exactamente
-> `DS_Entry` y que el PE es `machine (x86)`.
+> The Visual Studio path was not verified in the original test. If you plan to
+> publish a binary, check with `dumpbin /exports` that exactly `DS_Entry` appears
+> and that the PE is `machine (x86)`.
 
-Si CMake dice que `CMAKE_SIZEOF_VOID_P` es 8, estás compilando en x64. Usa
-`-A Win32` o el toolchain i686.
+If CMake reports `CMAKE_SIZEOF_VOID_P` is 8, you are building x64. Use
+`-A Win32` or the i686 toolchain.
 
 ---
 
-## Instalar
+## Installing
 
-1. Copia `libusb-1.0.dll` (32 bits) a la raíz del proyecto o a
+1. Copy `libusb-1.0.dll` (32-bit) to the project root or to
    `third_party\libusb\`.
-2. Copia `cism216.fw` a la raíz o a `firmware\`.
-3. Ejecuta **como Administrador**:
+2. Copy `cism216.fw` to the root or to `firmware\`.
+3. Run **as Administrator**:
 
 ```bat
 install.cmd
 ```
 
-El script copia a `%SystemRoot%\twain_32\Color USB Scanner\`:
+The script copies to `%SystemRoot%\twain_32\Color USB Scanner\`:
 
 ```
 ColorUSBScanner.ds
-libusb-1.0.dll     (si lo encuentra)
-cism216.fw         (si lo encuentra)
+libusb-1.0.dll     (if found)
+cism216.fw         (if found)
 ```
 
-Si existe el Data Source antiguo `Color USB Scanner.ds` de Plustek, lo aparta
-como `Color USB Scanner.ds.plustek.bak` para que NAPS2 no muestre dos entradas
-con el mismo nombre.
+If the old Plustek Data Source `Color USB Scanner.ds` exists, it is backed up as
+`Color USB Scanner.ds.plustek.bak` so NAPS2 does not show two entries with the
+same name.
 
-No hace falta registrar nada en el registro: el DSM de TWAIN enumera los `.ds`
-de `twain_32` (incluidas subcarpetas, como hace el DS de Canon). Cierra y
-reabre NAPS2 después de instalar.
+No registry entries are needed: the TWAIN DSM enumerates `.ds` files from
+`twain_32` (including subfolders, as Canon's DS does). Close and reopen NAPS2
+after installing.
 
-Si tu aplicación TWAIN no enumera el DS, copia también
-`ColorUSBScanner.ds` a `%SystemRoot%\twain_32\` (algunos DSM solo miran el
-nivel superior).
+If your TWAIN application does not list the DS, also copy
+`ColorUSBScanner.ds` to `%SystemRoot%\twain_32\` (some DSMs only look at the
+top level).
 
 ---
 
-## Probar sin hardware (modo de prueba)
+## Testing Without Hardware (Test Mode)
 
-Antes de conectar el escáner, valida el DS con una imagen sintética:
+Before connecting the scanner, validate the DS with a synthetic image:
 
 ```bat
 set COLORUSBSCANNER_TEST_PATTERN=1
 test_pattern.cmd
 ```
 
-O abre NAPS2 y escanea: obtendrás una imagen de prueba (marco negro,
-cuadrícula, cruz y gradiente) al DPI seleccionado.
+Or open NAPS2 and scan: you will get a test image (black border, grid, cross
+and gradient) at the selected DPI.
 
-El modo de prueba **no toca USB**: puedes usarlo sin Zadig, sin libusb y sin
-firmware.
+Test mode **does not touch USB**: you can use it without Zadig, without libusb
+and without firmware.
 
 ---
 
-## Probar con hardware
+## Testing With Hardware
 
-1. Enlaza el escáner a **WinUSB** con Zadig 2.9 y desconecta/reconecta.
-2. Copia `libusb-1.0.dll` de 32 bits y `cism216.fw` junto al `.ds`.
-3. **No** definas `COLORUSBSCANNER_TEST_PATTERN`.
-4. En NAPS2: perfil TWAIN **Color USB Scanner**, **Color**, **300 dpi**, A4.
-   También puedes ejecutar:
+1. Bind the scanner to **WinUSB** with Zadig 2.9 and unplug/replug.
+2. Copy 32-bit `libusb-1.0.dll` and `cism216.fw` alongside the `.ds`.
+3. Do **not** set `COLORUSBSCANNER_TEST_PATTERN`.
+4. In NAPS2: TWAIN profile **Color USB Scanner**, **Color**, **300 dpi**, A4.
+   You can also run:
 
 ```bat
 scan_real.cmd
 ```
 
-o manualmente:
+or manually:
 
 ```bat
 set "COLORUSBSCANNER_TEST_PATTERN="
@@ -245,86 +245,84 @@ set COLORUSBSCANNER_DEBUG=1
   --dpi 300 --bitdepth color -o real_scan.pdf -v
 ```
 
-Al escanear, el DS:
+When scanning, the DS:
 
-- sube `cism216.fw` y arranca el firmware (`0x69`);
-- enciende la lámpara y mueve el papel a `abs_y0=70`;
-- configura `0x20` para 2480×3508, color 8-bit;
-- lee 3508 líneas de 3 planos BGR por bulk IN;
-- devuelve RGB 24-bit a NAPS2.
+- uploads `cism216.fw` and boots the firmware (`0x69`);
+- turns on the lamp and moves the paper to `abs_y0=70`;
+- configures `0x20` for 2480×3508, 8-bit color;
+- reads 3508 lines of 3 BGR planes via bulk IN;
+- returns 24-bit RGB to NAPS2.
 
-El resultado esperado es un PDF A4 a 300 dpi y 2480×3508 píxeles.
+The expected result is an A4 PDF at 300 dpi and 2480×3508 pixels.
 
-### Log de errores
+### Error Log
 
-Con `COLORUSBSCANNER_DEBUG=1`, el DS escribe en:
+With `COLORUSBSCANNER_DEBUG=1`, the DS writes to:
 
 ```
 %TEMP%\ColorUSBScanner.log
 ```
 
-Los errores más probables:
+Most likely errors:
 
-- `OPENDS usb_open fallo`: el escáner no está en WinUSB, o `libusb-1.0.dll`
-  es de 64 bits / no está junto al `.ds`.
-- `No se pudo leer el firmware`: falta `cism216.fw` o la ruta es incorrecta.
-- `El firmware arranco pero el escaner no responde a get_id`: firmware
-  incorrecto o USB en mal estado.
-- `Fallo move_paper` / timeout de motor: papel mal insertado o sensor.
-- `El escaner no esta listo para transferir (0x35)`: no llegó a iniciar el
-  motor/scan.
-
----
-
-## Problemas conocidos y limitaciones
-
-- **Sin calibración de sombreado**: no se ha portado
-  `gt68xx_sheetfed_scanner_calibrate()`. La imagen puede tener bandas
-  verticales, polvo o dominante de color. Es el siguiente paso para calidad de
-  producción.
-- **Solo 300 dpi color A4 validado**. Otras resoluciones y el modo gris no
-  están confirmados en hardware.
-- **`07B3:045F` no soportado** por el código actual (solo busca `0412`).
-- **DS de 32 bits**: no aparece en aplicaciones TWAIN de 64 bits.
-- **No es un driver WIA**: no aparece en la app “Escáner” de Windows. Es un
-  Data Source TWAIN para NAPS2, IrfanView, Photoshop, etc.
-- **DS sin firmar**: SmartScreen o el antivirus pueden avisar. Verifica el
-  SHA-256 del binario y no ejecutes releases de terceros.
-- **Zadig cambia el driver del dispositivo**: puede romper WIA/Plustek; usa
-  `uninstall.cmd` y restaura el driver original si es necesario.
+- `OPENDS usb_open failed`: scanner is not bound to WinUSB, or `libusb-1.0.dll`
+  is 64-bit / not alongside the `.ds`.
+- `Could not read firmware`: `cism216.fw` is missing or the path is wrong.
+- `Firmware booted but scanner does not respond to get_id`: wrong firmware
+  or USB in bad state.
+- `move_paper failed` / motor timeout: paper not inserted correctly or sensor issue.
+- `Scanner not ready to transfer (0x35)`: motor/scan did not start.
 
 ---
 
-## Desinstalar y restaurar
+## Known Issues and Limitations
 
-Ejecuta **como Administrador**:
+- **No shading calibration**: `gt68xx_sheetfed_scanner_calibrate()` has not been
+  ported. The image may have vertical bands, dust or color cast. This is the next
+  step for production quality.
+- **Only 300 dpi color A4 validated** on hardware. Other resolutions and grayscale
+  mode are not confirmed.
+- **`07B3:045F` not supported** by current code (only searches for `0412`).
+- **32-bit DS**: does not appear in 64-bit TWAIN applications.
+- **Not a WIA driver**: does not appear in the Windows "Scanner" app. It is a
+  TWAIN Data Source for NAPS2, IrfanView, Photoshop, etc.
+- **Unsigned DS**: SmartScreen or antivirus may warn. Verify the binary SHA-256
+  and do not run releases from untrusted third parties.
+- **Zadig changes the device driver**: may break WIA/Plustek; use `uninstall.cmd`
+  and restore the original driver if needed.
+
+---
+
+## Uninstall and Restore
+
+Run **as Administrator**:
 
 ```bat
 uninstall.cmd
 ```
 
-El script:
+The script:
 
-- elimina `ColorUSBScanner.ds` de `%SystemRoot%\twain_32\Color USB Scanner\`;
-- restaura `Color USB Scanner.ds.plustek.bak` como `Color USB Scanner.ds` si
-  existe;
-- deja `libusb-1.0.dll` y `cism216.fw` en la carpeta (puedes borrarlos a mano).
+- removes `ColorUSBScanner.ds` from `%SystemRoot%\twain_32\Color USB Scanner\`;
+- restores `Color USB Scanner.ds.plustek.bak` as `Color USB Scanner.ds` if
+  it exists;
+- leaves `libusb-1.0.dll` and `cism216.fw` in the folder (delete them manually).
 
-Después, para devolver el escáner al driver original:
+Then, to return the scanner to its original driver:
 
-1. Abre **Zadig 2.9** como Administrador.
+1. Open **Zadig 2.9** as Administrator.
 2. **Options → List All Devices**.
-3. Selecciona `07B3 0412`.
-4. Pulsa **Restore Default Driver** (o reinstala el INF de Plustek).
-5. Desconecta/reconecta el escáner.
-6. Si usabas la app “Escáner” de Windows, reinstala el software/WIA de Plustek.
+3. Select `07B3 0412`.
+4. Click **Restore Default Driver** (or reinstall the Plustek INF).
+5. Unplug/replug the scanner.
+6. If you were using the Windows "Scanner" app, reinstall the Plustek software/WIA.
 
-`uninstall.cmd` no puede automatizar con seguridad la restauración del driver
-de kernel; Zadig o el INF original son la vía recomendada.
+`uninstall.cmd` cannot safely automate kernel driver restoration; Zadig or the
+original INF is the recommended path.
 
 ---
 
-## Estructura del repositorio
+## Repository Structure
 
 ```
 .
@@ -342,62 +340,62 @@ de kernel; Zadig o el INF original son la vía recomendada.
 ├─ docs/
 │  └─ VALIDATION.md
 ├─ firmware/
-│  └─ README.md          (no incluye cism216.fw)
+│  └─ README.md          (does not include cism216.fw)
 ├─ src/
-│  ├─ twain_ds.c          DS_Entry, identidad, capacidades, transferencia
-│  ├─ libusb_dyn.c/.h     carga dinámica de libusb-1.0.dll
+│  ├─ twain_ds.c          DS_Entry, identity, capabilities, transfer
+│  ├─ libusb_dyn.c/.h     dynamic loading of libusb-1.0.dll
 │  ├─ gt68xx_usb.c/.h     open/claim/reset, endpoints, bulk/control
-│  ├─ gt68xx_proto.c/.h   firmware, init, motor, setup y escaneo real
-│  └─ ColorUSBScanner.def exporta DS_Entry
+│  ├─ gt68xx_proto.c/.h   firmware, init, motor, setup and real scan
+│  └─ ColorUSBScanner.def exports DS_Entry
 ├─ third_party/
-│  ├─ twain.h             cabecera TWAIN (TWAIN Working Group)
-│  └─ libusb/libusb.h     cabecera libusb-1.0
+│  ├─ twain.h             TWAIN header (TWAIN Working Group)
+│  └─ libusb/libusb.h     libusb-1.0 header
 ├─ prebuilt/
-│  └─ ColorUSBScanner-test.ds  binario de conveniencia (ver abajo)
-└─ reference/             fuentes SANE gt68xx de consulta (no se compilan)
+│  └─ ColorUSBScanner-test.ds  convenience binary (see below)
+└─ reference/             SANE gt68xx reference sources (not compiled)
 ```
 
-### Sobre `prebuilt/ColorUSBScanner-test.ds`
+### About `prebuilt/ColorUSBScanner-test.ds`
 
-Es un binario de conveniencia para probar TWAIN sin compilar. No es un release
-oficial y puede no corresponder al último commit. Para uso real, compila desde
-fuente o usa un release con SHA-256 publicado.
-
----
-
-## Seguridad
-
-- El `.ds` **no está firmado**. Windows SmartScreen o un antivirus pueden
-  bloquearlo; no desactives la protección del sistema para evitarlo. Compila
-  desde fuente o verifica el hash del release.
-- El firmware se sube al escáner al abrir el DS. Un firmware incorrecto o
-  interrumpido puede dejar el dispositivo en mal estado; no desconectes
-  durante la subida.
-- `install.cmd` y `uninstall.cmd` modifican `%SystemRoot%\twain_32` y el driver
-  del dispositivo. Ejecútalos solo como Administrador y con una copia de
-  seguridad del driver original.
-- No redistribuyas `cism216.fw` sin permiso de Plustek.
+This is a convenience binary for testing TWAIN without compiling. It is not an
+official release and may not correspond to the latest commit. For real use,
+build from source or use a release with a published SHA-256.
 
 ---
 
-## Licencia y atribución
+## Security
 
-El código de `src/` es una obra derivada del backend SANE `gt68xx` y se
-distribuye bajo **GPL-2.0-or-later**. El texto completo de la GPL v2 está en
-[`LICENSE`](LICENSE). Atribución y detalles en [`NOTICE.md`](NOTICE.md).
+- The `.ds` **is not signed**. Windows SmartScreen or antivirus may block it;
+  do not disable system protection to work around it. Build from source or
+  verify the release hash.
+- The firmware is uploaded to the scanner when the DS opens. Incorrect or
+  interrupted firmware upload may leave the device in a bad state; do not
+  disconnect during upload.
+- `install.cmd` and `uninstall.cmd` modify `%SystemRoot%\twain_32` and the
+  device driver. Run them only as Administrator and with a backup of the
+  original driver.
+- Do not redistribute `cism216.fw` without Plustek's permission.
+
+---
+
+## License and Attribution
+
+The code in `src/` is a derivative work of the SANE `gt68xx` backend and is
+distributed under **GPL-2.0-or-later**. The full text of GPL v2 is in
+[`LICENSE`](LICENSE). Attribution and details in [`NOTICE.md`](NOTICE.md).
 
 - SANE `gt68xx`: <https://gitlab.com/sane-project/backends>
 - `third_party/twain.h`: TWAIN Working Group.
 - `third_party/libusb/libusb.h`: libusb, LGPL-2.1-or-later.
-- `cism216.fw`: firmware propietario de Plustek; **no incluido**.
+- `cism216.fw`: proprietary Plustek firmware; **not included**.
 
-Si no puedes aceptar la GPL, debes reimplementar el protocolo desde cero sin
-copiar código de SANE.
+If you cannot accept the GPL, you must reimplement the protocol from scratch
+without copying SANE code.
 
 ---
 
-## Sin garantía
+## No Warranty
 
-Este software se proporciona “AS IS”, sin garantía de ningún tipo. El uso de
-comandos de firmware/motor sobre el hardware es bajo tu responsabilidad. Ten el
-USB a mano y prueba primero en un equipo/VM de pruebas.
+This software is provided "AS IS", without warranty of any kind. Use of
+firmware/motor commands on hardware is at your own risk. Keep USB accessible
+and test first on a test machine/VM.
