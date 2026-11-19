@@ -1,15 +1,15 @@
 /*
- * twain_ds.c - TWAIN Data Source mínimo para el Plustek OpticSlim M12
- * (IRIScan Express 2), chipset GT-6816, VID 07B3 PID 0412.
+ * twain_ds.c - minimal TWAIN Data Source for the Plustek OpticSlim M12
+ * (IRIScan Express 2), GT-6816 chipset, VID 07B3 PID 0412.
  *
- * Implementa:
- *   - Identidad TWAIN y apertura/cierre.
- *   - Capacidades básicas (resolución, pixel type, bit depth, feeder).
- *   - Transferencia de imagen por memoria (DAT_IMAGEMEMXFER).
- *   - Imagen sintética de prueba si COLORUSBSCANNER_TEST_PATTERN=1.
+ * Implements:
+ *   - TWAIN identity and open/close.
+ *   - Basic capabilities (resolution, pixel type, bit depth, feeder).
+ *   - Memory image transfer (DAT_IMAGEMEMXFER).
+ *   - Synthetic test image when COLORUSBSCANNER_TEST_PATTERN=1.
  *
- * La lectura real del escáner está en gt68xx_proto.c: firmware, motor y
- * lectura bulk portados del backend SANE gt68xx.
+ * Real scanner reading is in gt68xx_proto.c: firmware, motor and bulk read
+ * ported from the SANE gt68xx backend.
  */
 #include <windows.h>
 #include <stdarg.h>
@@ -28,7 +28,7 @@
 #define DS_VERSION_STRING "1.0.0"
 #define DS_TEST_ENV       "COLORUSBSCANNER_TEST_PATTERN"
 
-/* TWAIN 2.x: entrada de la DS en el DSM. La cabecera 1.9 no las define. */
+/* TWAIN 2.x: DS entry point in the DSM. The 1.9 header does not define it. */
 #define GT68XX_DF_DS2          0x40000000UL
 #define GT68XX_DAT_ENTRYPOINT  0x0403
 
@@ -49,7 +49,7 @@ static HANDLE       g_xfer_thread = NULL;
 static GT68XX_ENTRYPOINT g_entrypoint;
 
 static TW_UINT16    g_condition = TWCC_SUCCESS;
-static TW_UINT16    g_state = 3;       /* 3=DSM abierto, 4=DS abierto, 5=enabled */
+static TW_UINT16    g_state = 3;       /* 3=DSM open, 4=DS open, 5=enabled */
 static BOOL         g_open = FALSE;
 static BOOL         g_enabled = FALSE;
 static BOOL         g_test_mode = FALSE;
@@ -67,7 +67,7 @@ static int g_bit_depth = 8;
 static int g_xfer_count = 1;
 
 /* ------------------------------------------------------------------------- */
-/* Utilidades                                                                */
+/* Utilities                                                                 */
 /* ------------------------------------------------------------------------- */
 
 static void set_condition(TW_UINT16 cc)
@@ -216,7 +216,7 @@ static void reset_caps(void)
 }
 
 /* ------------------------------------------------------------------------- */
-/* Notificación MSG_XFERREADY al DSM                                         */
+/* MSG_XFERREADY notification to the DSM                                     */
 /* ------------------------------------------------------------------------- */
 
 static void load_dsm_entry(void)
@@ -233,7 +233,7 @@ static void load_dsm_entry(void)
     }
     if (g_entrypoint.DSM_Entry) {
         g_dsm_entry = g_entrypoint.DSM_Entry;
-        ds_log("DSM_Entry desde DAT_ENTRYPOINT (%p)", (void *)g_dsm_entry);
+        ds_log("DSM_Entry from DAT_ENTRYPOINT (%p)", (void *)g_dsm_entry);
         return;
     }
     for (i = 0; modules[i]; i++) {
@@ -246,11 +246,11 @@ static void load_dsm_entry(void)
             *(FARPROC *)&g_dsm_entry = GetProcAddress(h, "_DSM_Entry@20");
         }
         if (g_dsm_entry) {
-            ds_log("DSM_Entry encontrado en %s", modules[i]);
+            ds_log("DSM_Entry found in %s", modules[i]);
             return;
         }
     }
-    ds_log("DSM_Entry NO encontrado");
+    ds_log("DSM_Entry NOT found");
 }
 
 static DWORD WINAPI xfer_ready_thread(LPVOID param)
@@ -277,7 +277,7 @@ static void notify_xfer_ready(void)
         load_dsm_entry();
     }
     if (!g_dsm_entry || !g_have_app) {
-        ds_log("no se puede notificar XFERREADY (dsm=%p app=%d)",
+        ds_log("cannot notify XFERREADY (dsm=%p app=%d)",
                (void *)g_dsm_entry, (int)g_have_app);
         return;
     }
@@ -287,12 +287,12 @@ static void notify_xfer_ready(void)
     }
     g_xfer_thread = CreateThread(NULL, 0, xfer_ready_thread, NULL, 0, NULL);
     if (!g_xfer_thread) {
-        ds_log("CreateThread(XFERREADY) fallo: %lu", GetLastError());
+        ds_log("CreateThread(XFERREADY) failed: %lu", GetLastError());
     }
 }
 
 /* ------------------------------------------------------------------------- */
-/* Capacidades                                                               */
+/* Capabilities                                                              */
 /* ------------------------------------------------------------------------- */
 
 static const TW_UINT16 g_supported_caps[] = {
@@ -534,7 +534,7 @@ static TW_UINT16 cap_set(pTW_CAPABILITY cap)
 
         case CAP_FEEDERENABLED:
         case CAP_DUPLEX:
-            /* Aceptado; el M12 es sheet-fed y no duplex. */
+            /* Accepted; the M12 is sheet-fed and has no duplex. */
             break;
 
         default:
@@ -604,8 +604,8 @@ static TW_UINT16 cap_query(pTW_CAPABILITY cap)
     }
 
     /*
-     * En MSG_QUERYSUPPORT, hContainer apunta a un TW_UINT16 que el DS debe
-     * rellenar con la máscara TWQC_*. No es un handle de memoria global.
+     * In MSG_QUERYSUPPORT, hContainer points to a TW_UINT16 that the DS must
+     * fill with the TWQC_* mask. It is not a global memory handle.
      */
     support = (TW_UINT16 *)cap->hContainer;
     *support = (TW_UINT16)(TWQC_GET | TWQC_SET | TWQC_GETDEFAULT |
@@ -614,7 +614,7 @@ static TW_UINT16 cap_query(pTW_CAPABILITY cap)
 }
 
 /* ------------------------------------------------------------------------- */
-/* Imagen                                                                    */
+/* Image                                                                     */
 /* ------------------------------------------------------------------------- */
 
 static int ensure_image(void)
@@ -638,7 +638,7 @@ static int ensure_image(void)
     }
 
     if (rc != 0) {
-        ds_log("scan fallo: %s", gt68xx_proto_last_error());
+        ds_log("scan failed: %s", gt68xx_proto_last_error());
         set_condition(TWCC_OPERATIONERROR);
         return 0;
     }
@@ -691,7 +691,7 @@ static TW_UINT16 do_image_layout(pTW_IMAGELAYOUT layout, TW_UINT16 msg)
         layout->PageNumber = 1;
         layout->FrameNumber = 1;
     }
-    /* MSG_SET: se acepta el área, pero el scaffold usa el área completa. */
+    /* MSG_SET: the area is accepted, but the scaffold uses the full area. */
     return TWRC_SUCCESS;
 }
 
@@ -808,7 +808,7 @@ TW_UINT16 FAR PASCAL DS_Entry(pTW_IDENTITY pOrigin,
                     g_have_app = TRUE;
                 }
                 if (pData) {
-                    /* El DSM asigna el Id de la Source en su TW_IDENTITY. */
+                    /* The DSM assigns the Source Id in its TW_IDENTITY. */
                     g_identity.Id = ((pTW_IDENTITY)pData)->Id;
                 }
                 ds_log("OPENDS src.Id=0x%08lX app.Id=0x%08lX app.Product=%s pData=%p",
@@ -819,13 +819,13 @@ TW_UINT16 FAR PASCAL DS_Entry(pTW_IDENTITY pOrigin,
                 ds_log("OPENDS test_mode=%d", (int)g_test_mode);
                 if (!g_test_mode) {
                     if (gt68xx_usb_open(&g_dev) != 0) {
-                        ds_log("OPENDS usb_open fallo: %s",
+                        ds_log("OPENDS usb_open failed: %s",
                                gt68xx_usb_last_error());
                         set_condition(TWCC_OPERATIONERROR);
                         return TWRC_FAILURE;
                     }
                     if (gt68xx_proto_init(g_dev) != 0) {
-                        ds_log("OPENDS proto_init fallo: %s",
+                        ds_log("OPENDS proto_init failed: %s",
                                gt68xx_proto_last_error());
                         gt68xx_usb_close(g_dev);
                         g_dev = NULL;
@@ -976,7 +976,7 @@ TW_UINT16 FAR PASCAL DS_Entry(pTW_IDENTITY pOrigin,
 
 #ifdef DAT_ENTRYPOINT
         case DAT_ENTRYPOINT:
-            /* TWAIN 2.x: se acepta, pero este DS usa memoria global 1.x. */
+            /* TWAIN 2.x: accepted, but this DS uses 1.x global memory. */
             return TWRC_SUCCESS;
 #endif
 

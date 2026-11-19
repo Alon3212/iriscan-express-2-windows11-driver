@@ -1,9 +1,9 @@
 /*
- * gt68xx_usb.c - apertura/claim del dispositivo y transporte USB.
+ * gt68xx_usb.c - device open/claim and USB transport.
  *
- * Requisito en Windows: el escáner debe estar enlazado a WinUSB/libusbK
- * (por ejemplo con Zadig), no a usbscan.sys. Si está enlazado al driver de
- * Plustek, libusb_open fallará con ACCESS/NOT_SUPPORTED.
+ * Windows requirement: the scanner must be bound to WinUSB/libusbK
+ * (for example with Zadig), not to usbscan.sys. If it is bound to the
+ * Plustek driver, libusb_open will fail with ACCESS/NOT_SUPPORTED.
  */
 #include "gt68xx_usb.h"
 #include "libusb_dyn.h"
@@ -35,7 +35,7 @@ static int find_endpoints(gt68xx_device *dev, libusb_device *device)
     int i, a, e;
 
     if (g_libusb.get_active_config_descriptor(device, &config) != 0 || !config) {
-        set_error("No se pudo leer la configuracion USB activa");
+        set_error("Could not read the active USB configuration");
         return -1;
     }
 
@@ -66,7 +66,7 @@ static int find_endpoints(gt68xx_device *dev, libusb_device *device)
     g_libusb.free_config_descriptor(config);
 
     if (dev->ep_in == 0 || dev->ep_out == 0) {
-        set_error("El dispositivo no expone endpoints bulk IN/OUT en la interfaz 0 "
+        set_error("The device does not expose bulk IN/OUT endpoints on interface 0 "
                   "(ep_in=0x%02X ep_out=0x%02X)",
                   dev->ep_in, dev->ep_out);
         return -1;
@@ -94,13 +94,13 @@ int gt68xx_usb_open(gt68xx_device **out)
     }
 
     if (g_libusb.init(&ctx) != 0) {
-        set_error("libusb_init fallo");
+        set_error("libusb_init failed");
         return -1;
     }
 
     count = g_libusb.get_device_list(ctx, &list);
     if (count < 0) {
-        set_error("libusb_get_device_list fallo: %s",
+        set_error("libusb_get_device_list failed: %s",
                   gt68xx_libusb_error_string((int)count));
         g_libusb.exit(ctx);
         return -1;
@@ -127,10 +127,10 @@ int gt68xx_usb_open(gt68xx_device **out)
             g_libusb.set_auto_detach_kernel_driver(handle, 1);
         }
 
-        /* El reset puede devolver NOT_FOUND si el dispositivo se reenumera. */
+        /* Reset may return NOT_FOUND if the device re-enumerates. */
         (void)g_libusb.reset_device(handle);
 
-        /* No es fatal si el dispositivo ya está configurado. */
+        /* Not fatal if the device is already configured. */
         (void)g_libusb.set_configuration(handle, 1);
 
         if (g_libusb.claim_interface(handle, 0) != 0) {
@@ -143,7 +143,7 @@ int gt68xx_usb_open(gt68xx_device **out)
         if (!dev) {
             g_libusb.release_interface(handle, 0);
             g_libusb.close(handle);
-            set_error("Sin memoria para gt68xx_device");
+            set_error("Out of memory for gt68xx_device");
             break;
         }
 
@@ -169,13 +169,13 @@ int gt68xx_usb_open(gt68xx_device **out)
 
     if (result != 0) {
         if (last_libusb_error == LIBUSB_ERROR_ACCESS) {
-            set_error("No se pudo abrir 07B3:0412. Comprueba que el escaner este "
-                      "enlazado a WinUSB/libusbK con Zadig, no a usbscan.sys.");
+            set_error("Could not open 07B3:0412. Check that the scanner is "
+                      "bound to WinUSB/libusbK with Zadig, not to usbscan.sys.");
         } else if (last_libusb_error == LIBUSB_ERROR_BUSY) {
-            set_error("El dispositivo 07B3:0412 esta ocupado o no se pudo "
-                      "reclamar la interfaz 0.");
+            set_error("Device 07B3:0412 is busy or interface 0 could not be "
+                      "claimed.");
         } else {
-            set_error("No se encontro el escaner USB 07B3:0412.");
+            set_error("USB scanner 07B3:0412 was not found.");
         }
         g_libusb.exit(ctx);
     }
@@ -206,7 +206,7 @@ int gt68xx_usb_reset(gt68xx_device *dev)
     }
     r = g_libusb.reset_device(dev->handle);
     if (r != 0) {
-        set_error("libusb_reset_device fallo: %s", gt68xx_libusb_error_string(r));
+        set_error("libusb_reset_device failed: %s", gt68xx_libusb_error_string(r));
         return r;
     }
     return 0;
@@ -225,7 +225,7 @@ int gt68xx_usb_control(gt68xx_device *dev,
     r = g_libusb.control_transfer(dev->handle, request_type, request,
                                   value, index, data, length, timeout_ms);
     if (r < 0) {
-        set_error("control_transfer fallo: %s", gt68xx_libusb_error_string(r));
+        set_error("control_transfer failed: %s", gt68xx_libusb_error_string(r));
     }
     return r;
 }
@@ -243,7 +243,7 @@ int gt68xx_usb_bulk_write(gt68xx_device *dev, const uint8_t *data, int length,
                                (unsigned char *)data, length,
                                &transferred, timeout_ms);
     if (r < 0) {
-        set_error("bulk_write fallo: %s", gt68xx_libusb_error_string(r));
+        set_error("bulk_write failed: %s", gt68xx_libusb_error_string(r));
         return r;
     }
     return transferred;
@@ -261,7 +261,7 @@ int gt68xx_usb_bulk_read(gt68xx_device *dev, uint8_t *data, int length,
     r = g_libusb.bulk_transfer(dev->handle, dev->ep_in,
                                data, length, &transferred, timeout_ms);
     if (r < 0) {
-        set_error("bulk_read fallo: %s", gt68xx_libusb_error_string(r));
+        set_error("bulk_read failed: %s", gt68xx_libusb_error_string(r));
         return r;
     }
     return transferred;

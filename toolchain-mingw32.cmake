@@ -1,6 +1,6 @@
-# Toolchain para compilar el DS en 32 bits con MinGW-w64.
-# Uso:
-#   cmake -S . -B build -G "MinGW Makefiles" \
+# Toolchain for building the 32-bit DS with MinGW-w64.
+# Usage:
+#   cmake -S . -B build -G "MinGW Makefiles" ^
 #         -DCMAKE_TOOLCHAIN_FILE=toolchain-mingw32.cmake
 set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_SYSTEM_PROCESSOR x86)

@@ -1,5 +1,5 @@
 /*
- * libusb_dyn.c - carga dinámica de libusb-1.0.dll
+ * libusb_dyn.c - dynamic loading of libusb-1.0.dll
  */
 #include "libusb_dyn.h"
 
@@ -36,7 +36,7 @@ const char *gt68xx_libusb_error_string(int code)
     return buf;
 }
 
-/* Devuelve la carpeta del .ds (sin barra final). */
+/* Returns the .ds directory (without trailing separator). */
 static int get_module_dir(char *dir, size_t dir_size)
 {
     HMODULE mod = NULL;
@@ -67,7 +67,7 @@ static int get_module_dir(char *dir, size_t dir_size)
     do {                                                                        \
         *(FARPROC *)&g_libusb.field = GetProcAddress(mod, name);                 \
         if (!g_libusb.field) {                                                   \
-            set_last_error("libusb-1.0.dll: falta el simbolo %s", name);         \
+            set_last_error("libusb-1.0.dll: missing symbol %s", name);           \
             goto fail;                                                           \
         }                                                                        \
     } while (0)
@@ -101,8 +101,8 @@ int gt68xx_libusb_load(void)
         mod = LoadLibraryA("libusb-1.0.dll");
     }
     if (!mod) {
-        set_last_error("No se pudo cargar libusb-1.0.dll (error %lu). "
-                       "Copia la DLL de 32 bits junto a ColorUSBScanner.ds.",
+        set_last_error("Could not load libusb-1.0.dll (error %lu). "
+                       "Copy the 32-bit DLL next to ColorUSBScanner.ds.",
                        GetLastError());
         return -1;
     }

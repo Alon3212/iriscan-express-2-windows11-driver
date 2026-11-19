@@ -1,9 +1,9 @@
-# Licencias y atribución
+# Licenses and attribution
 
-## Código de ColorUSBScanner
+## ColorUSBScanner code
 
-El código de `src/` es una obra derivada del backend SANE `gt68xx`
-(GPL-2.0-or-later), en particular de:
+The code in `src/` is a derivative work of the SANE `gt68xx` backend
+(GPL-2.0-or-later), in particular:
 
 - `backend/gt68xx_low.c`
 - `backend/gt68xx_gt6816.c`
@@ -12,38 +12,38 @@ El código de `src/` es una obra derivada del backend SANE `gt68xx`
 - `backend/gt68xx_high.c`
 - `backend/gt68xx_devices.c`
 
-Por eso se distribuye bajo **GPL-2.0-or-later**. El texto completo de la GPL
-v2 está en [`LICENSE`](LICENSE). Si no puedes aceptar GPL, debes reimplementar
-el protocolo desde cero sin copiar código de SANE.
+It is therefore distributed under **GPL-2.0-or-later**. The full GPL v2 text
+is in [`LICENSE`](LICENSE). If you cannot accept the GPL, you must reimplement
+the protocol from scratch without copying SANE code.
 
-Proyecto SANE: <https://gitlab.com/sane-project/backends>
+SANE project: <https://gitlab.com/sane-project/backends>
 
 ## third_party/twain.h
 
-Cabecera TWAIN propiedad de TWAIN Working Group. Se usa bajo la licencia
-TWAIN; consulta el encabezado del archivo. Es la cabecera oficial usada por
+TWAIN header owned by the TWAIN Working Group. It is used under the TWAIN
+license; see the header of the file. This is the official header used by
 `libksane` (KDE).
 
 ## third_party/libusb/libusb.h
 
-Cabecera de libusb-1.0, distribuida bajo **LGPL-2.1-or-later**. La DLL
-`libusb-1.0.dll` que se copie junto al Data Source conserva su propia
-licencia; no se redistribuye en este repositorio. Versión probada: libusb
-1.0.30 (32 bits, MinGW32).
+libusb-1.0 header, distributed under **LGPL-2.1-or-later**. The
+`libusb-1.0.dll` copied next to the Data Source keeps its own license; it is
+not redistributed in this repository. Tested version: libusb 1.0.30 (32-bit,
+MinGW32).
 
 ## cism216.fw
 
-Firmware propietario de Plustek. **No se redistribuye** en este repositorio.
-El usuario debe extraerlo de un instalador oficial que corresponda a su
-escáner. Consulta [`firmware/README.md`](firmware/README.md).
+Proprietary Plustek firmware. **It is not redistributed** in this repository.
+Users must extract it from an official installer that matches their scanner.
+See [`firmware/README.md`](firmware/README.md).
 
 ## reference/
 
-Copias de solo lectura de las fuentes SANE `gt68xx` para consulta. Son
-GPL-2.0-or-later y **no se compilan** en el Data Source. Se incluyen para
-trazabilidad del port.
+Read-only copies of the SANE `gt68xx` sources for reference. They are
+GPL-2.0-or-later and are **not compiled** into the Data Source. They are
+included for porting traceability.
 
-## Sin garantía
+## No warranty
 
-Este software se proporciona "AS IS", sin garantía de ningún tipo. El uso de
-comandos de firmware/motor sobre el hardware es bajo tu responsabilidad.
+This software is provided "AS IS", without warranty of any kind. Using
+firmware/motor commands on the hardware is at your own risk.

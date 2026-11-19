@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.15)
 project(ColorUSBScanner C)
 
 if(NOT WIN32)
-    message(FATAL_ERROR "Este Data Source es solo para Windows.")
+    message(FATAL_ERROR "This Data Source is Windows-only.")
 endif()
 
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 4)
-    message(FATAL_ERROR "Compila en 32 bits (Visual Studio: -A Win32; MinGW: i686-w64-mingw32).")
+    message(FATAL_ERROR "Build in 32-bit mode (Visual Studio: -A Win32; MinGW: i686-w64-mingw32).")
 endif()
 
 set(SOURCES
@@ -38,7 +38,7 @@ if(MSVC)
         "/DEF:${CMAKE_CURRENT_SOURCE_DIR}/src/ColorUSBScanner.def")
     target_compile_options(ColorUSBScanner PRIVATE /W3)
 else()
-    # MinGW: el símbolo es _DS_Entry@20; --kill-at exporta DS_Entry.
+    # MinGW: the symbol is _DS_Entry@20; --kill-at exports DS_Entry.
     target_link_options(ColorUSBScanner PRIVATE "-Wl,--kill-at")
     target_compile_options(ColorUSBScanner PRIVATE -Wall -Wextra)
 endif()
@@ -49,7 +49,7 @@ set_target_properties(ColorUSBScanner PROPERTIES
     SUFFIX ".ds"
 )
 
-# Instalación local (no usa el instalador de Windows).
+# Local install (does not use the Windows installer).
 install(TARGETS ColorUSBScanner RUNTIME DESTINATION ".")
 install(FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/README.md"

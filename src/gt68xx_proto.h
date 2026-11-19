@@ -1,11 +1,11 @@
 /*
- * gt68xx_proto.h - interfaz del protocolo GT-6816.
+ * gt68xx_proto.h - GT-6816 protocol interface.
  *
- * Estado actual: subida de firmware, inicialización, motor y lectura real
- * portados de SANE para el OpticSlim M12 (GT-6816). La ruta principal es
- * color 8-bit, 300 dpi, A4, line mode CIS. No incluye calibración de sombreado
- * (se aplica solo gamma 2.0); para producción hay que portar el calibrador.
- * El modo de prueba sigue generando una imagen sintética.
+ * Current status: firmware upload, initialization, motor control and real
+ * image read ported from SANE for the OpticSlim M12 (GT-6816). The main path
+ * is 8-bit color, 300 dpi, A4, CIS line mode. It does not include shading
+ * calibration (only gamma 2.0 is applied); production use requires porting
+ * the calibrator. Test mode still generates a synthetic image.
  */
 #ifndef GT68XX_PROTO_H
 #define GT68XX_PROTO_H

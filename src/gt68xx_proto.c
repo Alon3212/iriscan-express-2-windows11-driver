@@ -1,14 +1,14 @@
 /*
- * gt68xx_proto.c - protocolo GT-6816 para el Plustek OpticSlim M12.
+ * gt68xx_proto.c - GT-6816 protocol for the Plustek OpticSlim M12.
  *
- * Portado de SANE:
+ * Ported from SANE:
  *   - gt68xx_gt6816.c: firmware, stop_scan, lamp, is_moving.
  *   - gt68xx_generic.c: move_paper, setup_scan, set_afe, set_exposure,
  *     start_scan, read_scanned_data.
- *   - gt68xx_mid.c: line mode CIS BGR (3 planos de scan_bpl bytes).
+ *   - gt68xx_mid.c: CIS BGR line mode (3 planes of scan_bpl bytes).
  *
- * La ruta implementada es color 8-bit, 300 dpi, A4 (210x297 mm), sin
- * calibración de sombreado; aplica gamma 2.0. El modo de prueba no toca USB.
+ * The implemented path is 8-bit color, 300 dpi, A4 (210x297 mm), without
+ * shading calibration; gamma 2.0 is applied. Test mode does not touch USB.
  */
 #include "gt68xx_proto.h"
 
@@ -104,11 +104,11 @@ static int read_file(const char *path, unsigned char **data, size_t *length)
 }
 
 /* ------------------------------------------------------------------------- */
-/* Protocolo de bajo nivel del GT-6816 (portado de SANE gt68xx)              */
+/* Low-level GT-6816 protocol (ported from SANE gt68xx)                      */
 /* ------------------------------------------------------------------------- */
 
-/* gt68xx_low.h: los comandos "normales" son paquetes de 64 bytes; los
- * comandos "small" (p. ej. stop_scan 0x41) son de 8 bytes. */
+/* gt68xx_low.h: "normal" commands are 64-byte packets; "small" commands
+ * (for example stop_scan 0x41) are 8-byte packets. */
 #define GT68XX_PACKET_SIZE        64
 #define GT68XX_SMALL_PACKET_SIZE  8
 #define GT68XX_FW_BLOCK_SIZE      64
@@ -135,11 +135,11 @@ static int control_out(gt68xx_device *dev, uint16_t value, uint16_t index,
                                value, index, (uint8_t *)data, length,
                                GT68XX_CMD_TIMEOUT_MS);
     if (r < 0) {
-        set_error("control OUT fallo: %s", gt68xx_usb_last_error());
+        set_error("control OUT failed: %s", gt68xx_usb_last_error());
         return -1;
     }
     if (r != (int)length) {
-        set_error("control OUT corto: %d/%u", r, (unsigned)length);
+        set_error("short control OUT: %d/%u", r, (unsigned)length);
         return -1;
     }
     return 0;
@@ -153,18 +153,18 @@ static int control_in(gt68xx_device *dev, uint16_t value, uint16_t index,
     r = gt68xx_usb_control(dev, GT68XX_REQ_TYPE_IN, GT68XX_REQUEST,
                            value, index, data, length, GT68XX_CMD_TIMEOUT_MS);
     if (r < 0) {
-        set_error("control IN fallo: %s", gt68xx_usb_last_error());
+        set_error("control IN failed: %s", gt68xx_usb_last_error());
         return -1;
     }
     if (r != (int)length) {
-        set_error("control IN corto: %d/%u", r, (unsigned)length);
+        set_error("short control IN: %d/%u", r, (unsigned)length);
         return -1;
     }
     return 0;
 }
 
-/* Equivale a gt68xx_device_req(): comando normal de 64 bytes y respuesta de
- * 64 bytes (gt68xx_low.c, gt68xx_device_generic_req). */
+/* Equivalent to gt68xx_device_req(): 64-byte command and 64-byte response
+ * (gt68xx_low.c, gt68xx_device_generic_req). */
 static int device_req(gt68xx_device *dev, const uint8_t *cmd, uint8_t *res)
 {
     uint8_t out[GT68XX_PACKET_SIZE];
@@ -187,7 +187,7 @@ static int device_req(gt68xx_device *dev, const uint8_t *cmd, uint8_t *res)
     return 0;
 }
 
-/* Equivale a gt68xx_device_small_req(): comando/respuesta de 8 bytes. */
+/* Equivalent to gt68xx_device_small_req(): 8-byte command/response. */
 static int small_req(gt68xx_device *dev, const uint8_t *cmd, uint8_t *res)
 {
     uint8_t out[GT68XX_SMALL_PACKET_SIZE];
@@ -210,25 +210,25 @@ static int small_req(gt68xx_device *dev, const uint8_t *cmd, uint8_t *res)
     return 0;
 }
 
-/* gt68xx_device_check_result(): respuesta 00 <cmd> ... */
+/* gt68xx_device_check_result(): response 00 <cmd> ... */
 static int check_result(const uint8_t *res, uint8_t command)
 {
     if (!res || res[0] != 0x00 || res[1] != command) {
-        set_error("Respuesta inesperada del escaner: %02X %02X (esperado 00 %02X)",
+        set_error("Unexpected scanner response: %02X %02X (expected 00 %02X)",
                   res ? res[0] : 0, res ? res[1] : 0, command);
         return -1;
     }
     return 0;
 }
 
-/* Equivale a gt68xx_device_memory_write(). */
+/* Equivalent to gt68xx_device_memory_write(). */
 static int memory_write(gt68xx_device *dev, uint16_t addr,
                         const uint8_t *data, uint16_t length)
 {
     return control_out(dev, GT68XX_MEM_WRITE_VALUE, addr, data, length);
 }
 
-/* Equivale a gt68xx_device_memory_read(). */
+/* Equivalent to gt68xx_device_memory_read(). */
 static int memory_read(gt68xx_device *dev, uint16_t addr,
                        uint8_t *data, uint16_t length)
 {
@@ -236,10 +236,10 @@ static int memory_read(gt68xx_device *dev, uint16_t addr,
 }
 
 /*
- * Portado de gt6816_download_firmware() (backend/gt68xx_gt6816.c):
- *   1. Escribe el firmware en bloques de 64 bytes en la memoria del chip.
- *   2. Relee cada bloque y compara.
- *   3. Envía el comando de arranque 0x69 0x01 <addr_lo> <addr_hi>.
+ * Ported from gt6816_download_firmware() (backend/gt68xx_gt6816.c):
+ *   1. Write the firmware to chip memory in 64-byte blocks.
+ *   2. Read each block back and compare it.
+ *   3. Send the boot command 0x69 0x01 <addr_lo> <addr_hi>.
  */
 static int gt68xx_upload_firmware(gt68xx_device *dev,
                                   const unsigned char *firmware,
@@ -251,11 +251,11 @@ static int gt68xx_upload_firmware(gt68xx_device *dev,
     uint8_t boot[GT68XX_PACKET_SIZE];
 
     if (!dev || !firmware || firmware_length == 0) {
-        set_error("Firmware vacio o dispositivo nulo");
+        set_error("Empty firmware or null device");
         return GT68XX_ERR_IO;
     }
     if (firmware_length > 0xFFFF) {
-        set_error("Firmware demasiado grande para el GT-6816: %lu bytes",
+        set_error("Firmware is too large for the GT-6816: %lu bytes",
                   (unsigned long)firmware_length);
         return GT68XX_ERR_IO;
     }
@@ -268,17 +268,17 @@ static int gt68xx_upload_firmware(gt68xx_device *dev,
         memcpy(block, firmware + addr, n);
 
         if (memory_write(dev, (uint16_t)addr, block, GT68XX_FW_BLOCK_SIZE) != 0) {
-            set_error("Firmware: fallo escribiendo bloque 0x%04lX",
+            set_error("Firmware: failed writing block 0x%04lX",
                       (unsigned long)addr);
             return GT68XX_ERR_IO;
         }
         if (memory_read(dev, (uint16_t)addr, check, GT68XX_FW_BLOCK_SIZE) != 0) {
-            set_error("Firmware: fallo leyendo bloque 0x%04lX",
+            set_error("Firmware: failed reading block 0x%04lX",
                       (unsigned long)addr);
             return GT68XX_ERR_IO;
         }
         if (memcmp(block, check, GT68XX_FW_BLOCK_SIZE) != 0) {
-            set_error("Firmware: verificacion fallida en bloque 0x%04lX",
+            set_error("Firmware: verification failed at block 0x%04lX",
                       (unsigned long)addr);
             return GT68XX_ERR_IO;
         }
@@ -291,16 +291,16 @@ static int gt68xx_upload_firmware(gt68xx_device *dev,
     boot[3] = (uint8_t)((addr >> 8) & 0xFF);
 
     if (device_req(dev, boot, NULL) != 0) {
-        set_error("Firmware: fallo el comando de arranque 0x69");
+        set_error("Firmware: boot command 0x69 failed");
         return GT68XX_ERR_IO;
     }
 
-    OutputDebugStringA("ColorUSBScanner: firmware cism216.fw cargado y arrancado\n");
+    OutputDebugStringA("ColorUSBScanner: cism216.fw loaded and booted\n");
     return 0;
 }
 
 /* ------------------------------------------------------------------------- */
-/* Comandos del command set mustek-gt6816 / modelo OpticSlim M12             */
+/* mustek-gt6816 command set / OpticSlim M12 model commands                  */
 /* ------------------------------------------------------------------------- */
 
 #define M12_BASE_XDPI          600
@@ -387,7 +387,7 @@ static int gt68xx_is_moving(gt68xx_device *dev, int *moving)
         return -1;
     }
     if (res[0] != 0x00 || res[1] != 0x17) {
-        set_error("is_moving: respuesta %02X %02X", res[0], res[1]);
+        set_error("is_moving: response %02X %02X", res[0], res[1]);
         return -1;
     }
     *moving = (res[2] != 0 || (res[3] != 0 && res[3] != 2));
@@ -411,11 +411,11 @@ static int gt68xx_wait_positioning(gt68xx_device *dev)
         }
         Sleep(100);
     }
-    set_error("Tiempo de espera agotado: el motor no queda quieto");
+    set_error("Timeout: the motor did not come to rest");
     return -1;
 }
 
-/* 0x82: mover el papel hasta abs_y0 (gt68xx_generic_move_paper). */
+/* 0x82: move paper to abs_y0 (gt68xx_generic_move_paper). */
 static int gt68xx_move_paper(gt68xx_device *dev, int abs_y0)
 {
     uint8_t req[GT68XX_PACKET_SIZE];
@@ -428,7 +428,7 @@ static int gt68xx_move_paper(gt68xx_device *dev, int abs_y0)
     return device_req(dev, req, res);
 }
 
-/* 0x22: AFE del M12 {0x24,0x0a, 0x23,0x0f, 0x23,0x0b}. */
+/* 0x22: M12 AFE {0x24,0x0a, 0x23,0x0f, 0x23,0x0b}. */
 static int gt68xx_set_afe(gt68xx_device *dev)
 {
     uint8_t req[GT68XX_PACKET_SIZE];
@@ -446,7 +446,7 @@ static int gt68xx_set_afe(gt68xx_device *dev)
     return device_req(dev, req, res);
 }
 
-/* 0x76: tiempos de exposicion por defecto {0x157,0x157,0x157}. */
+/* 0x76: default exposure times {0x157,0x157,0x157}. */
 static int gt68xx_set_exposure(gt68xx_device *dev)
 {
     uint8_t req[GT68XX_PACKET_SIZE];
@@ -495,8 +495,8 @@ static int gt68xx_read_ready(gt68xx_device *dev, int *ready)
     return 0;
 }
 
-/* 0x83: paperfeed; SANE lo usa al cancelar/terminar un sheet-fed para
- * expulsar la hoja. */
+/* 0x83: paperfeed; SANE uses it when canceling/finishing a sheet-fed scan
+ * to eject the sheet. */
 static int gt68xx_paperfeed(gt68xx_device *dev)
 {
     uint8_t req[GT68XX_PACKET_SIZE];
@@ -508,7 +508,7 @@ static int gt68xx_paperfeed(gt68xx_device *dev)
     return device_req(dev, req, res);
 }
 
-/* 0x41: stop_scan usa el comando "small" de 8 bytes. */
+/* 0x41: stop_scan uses the 8-byte "small" command. */
 static int gt68xx_stop_scan(gt68xx_device *dev)
 {
     uint8_t req[GT68XX_SMALL_PACKET_SIZE];
@@ -529,13 +529,13 @@ static int gt68xx_bulk_read_exact(gt68xx_device *dev, uint8_t *buf, int length)
         int r = gt68xx_usb_bulk_read(dev, buf + off, length - off,
                                      GT68XX_BULK_TIMEOUT_MS);
         if (r < 0) {
-            set_error("Lectura bulk fallo a %d/%d: %s", off, length,
+            set_error("Bulk read failed at %d/%d: %s", off, length,
                       gt68xx_usb_last_error());
             return -1;
         }
         if (r == 0) {
             if (++retries > 20) {
-                set_error("Lectura bulk sin datos a %d/%d", off, length);
+                set_error("Bulk read returned no data at %d/%d", off, length);
                 return -1;
             }
             Sleep(1);
@@ -547,13 +547,13 @@ static int gt68xx_bulk_read_exact(gt68xx_device *dev, uint8_t *buf, int length)
     return 0;
 }
 
-/* Calcula la geometria del M12 para A4 (210x297mm), color 8-bit, line mode. */
+/* Compute M12 geometry for A4 (210x297mm), 8-bit color, line mode. */
 static int gt68xx_compute_geometry(int dpi, gt68xx_scan_geometry *g)
 {
     int pixel_y0;
 
     if (dpi < 50 || dpi > 600) {
-        set_error("DPI no soportado: %d", dpi);
+        set_error("Unsupported DPI: %d", dpi);
         return -1;
     }
     memset(g, 0, sizeof(*g));
@@ -562,28 +562,28 @@ static int gt68xx_compute_geometry(int dpi, gt68xx_scan_geometry *g)
     g->pixel_xs = (int)(210.0 * (double)dpi / 25.4 + 0.5);
     g->pixel_ys = (int)(297.0 * (double)dpi / 25.4 + 0.5);
     if (g->pixel_xs < 1 || g->pixel_ys < 1) {
-        set_error("Geometria A4 invalida para %d dpi", dpi);
+        set_error("Invalid A4 geometry for %d dpi", dpi);
         return -1;
     }
 
-    /* SANE alinea el ancho a un multiplo de 64 bytes; sobra ancho fisico
-     * que se descarta al componer la imagen. */
+    /* SANE aligns the width to a multiple of 64 bytes; the extra physical
+     * width is discarded when composing the image. */
     g->scan_xs = (g->pixel_xs + 63) & ~63;
-    g->scan_bpl = g->scan_xs;          /* 8 bits por pixel y plano */
-    g->scan_ys = g->pixel_ys * 3;      /* 3 lineas CIS por linea RGB */
+    g->scan_bpl = g->scan_xs;          /* 8 bits per pixel per plane */
+    g->scan_ys = g->pixel_ys * 3;      /* 3 CIS lines per RGB line */
 
-    /* y0 de setup_scan: request->y0 (1.5mm) + model->y_offset (1.5mm). */
+    /* setup_scan y0: request->y0 (1.5mm) + model->y_offset (1.5mm). */
     pixel_y0 = (int)((M12_Y_OFFSET_MM + M12_Y_OFFSET_MM) *
                      (double)dpi / 25.4 + 0.5);
     g->abs_y0 = pixel_y0 * M12_BASE_YDPI / dpi;
     g->abs_x0 = 0;
     g->abs_xs = g->scan_xs * M12_BASE_XDPI / dpi;
-    /* SANE calcula abs_ys ANTES de multiplicar scan_ys por 3 (line mode). */
+    /* SANE computes abs_ys BEFORE multiplying scan_ys by 3 (line mode). */
     g->abs_ys = g->pixel_ys * M12_BASE_YDPI / dpi;
     return 0;
 }
 
-/* 0x20: setup_scan para SA_SCAN, color, line mode, mbs=1, mds=1, mas=0. */
+/* 0x20: setup_scan for SA_SCAN, color, line mode, mbs=1, mds=1, mas=0. */
 static int gt68xx_setup_scan(gt68xx_device *dev, const gt68xx_scan_geometry *g)
 {
     uint8_t req[GT68XX_PACKET_SIZE];
@@ -603,7 +603,7 @@ static int gt68xx_setup_scan(gt68xx_device *dev, const gt68xx_scan_geometry *g)
     req[0x0f] = 0x00;
     put16(req + 0x10, (unsigned int)g->scan_bpl);
     put16(req + 0x12, (unsigned int)g->scan_ys);
-    req[0x14] = 0x01;          /* mbs=1, mds=1, mas=0, sin backtrack */
+    req[0x14] = 0x01;          /* mbs=1, mds=1, mas=0, no backtrack */
     req[0x15] = 0x00;          /* lamp on, line mode */
     put16(req + 0x16, (unsigned int)g->ydpi);
     req[0x18] = 0x00;
@@ -622,22 +622,22 @@ int gt68xx_proto_init(gt68xx_device *dev)
     int rc;
 
     if (!dev) {
-        set_error("gt68xx_proto_init: dispositivo nulo");
+        set_error("gt68xx_proto_init: null device");
         return -1;
     }
 
     if (get_ds_dir(path, sizeof(path)) != 0) {
-        set_error("No se pudo determinar la carpeta del Data Source");
+        set_error("Could not determine the Data Source directory");
         return GT68XX_ERR_IO;
     }
     if (strlen(path) + strlen("\\cism216.fw") + 1 >= sizeof(path)) {
-        set_error("Ruta de firmware demasiado larga");
+        set_error("Firmware path is too long");
         return GT68XX_ERR_IO;
     }
     strcat(path, "\\cism216.fw");
 
     if (read_file(path, &firmware, &firmware_length) != 0) {
-        set_error("No se pudo leer el firmware: %s", path);
+        set_error("Could not read the firmware: %s", path);
         return GT68XX_ERR_IO;
     }
 
@@ -648,8 +648,8 @@ int gt68xx_proto_init(gt68xx_device *dev)
         return rc;
     }
 
-    /* Tras arrancar el firmware, el escaner necesita un instante antes de
-     * aceptar comandos normales. gt68xx.c hace get_id + stop_scan + lamp on. */
+    /* After booting the firmware, the scanner needs a moment before it
+     * accepts normal commands. gt68xx.c does get_id + stop_scan + lamp on. */
     Sleep(200);
     for (rc = 0; rc < 10; rc++) {
         if (gt68xx_get_id(dev) == 0) {
@@ -658,20 +658,20 @@ int gt68xx_proto_init(gt68xx_device *dev)
         Sleep(200);
     }
     if (rc >= 10) {
-        set_error("El firmware arranco pero el escaner no responde a get_id");
+        set_error("Firmware booted but the scanner does not answer get_id");
         return GT68XX_ERR_IO;
     }
 
     (void)gt68xx_stop_scan(dev);
     if (gt68xx_lamp_control(dev, 1) != 0) {
-        set_error("No se pudo encender la lampara del escaner");
+        set_error("Could not turn on the scanner lamp");
         return GT68XX_ERR_IO;
     }
     return 0;
 }
 
 /* ------------------------------------------------------------------------- */
-/* Escaneo real: A4, color 8-bit, line mode CIS                              */
+/* Real scan: A4, 8-bit color, CIS line mode                                 */
 /* ------------------------------------------------------------------------- */
 
 static int gt68xx_scan_real(gt68xx_device *dev, int dpi, int pixel_type,
@@ -690,7 +690,7 @@ static int gt68xx_scan_real(gt68xx_device *dev, int dpi, int pixel_type,
     uint8_t gamma_lut[256];
 
     if (!dev || !img) {
-        set_error("Escaner o imagen nulos");
+        set_error("Null scanner or image");
         return GT68XX_ERR_IO;
     }
     if (gt68xx_compute_geometry(dpi, &g) != 0) {
@@ -702,12 +702,12 @@ static int gt68xx_scan_real(gt68xx_device *dev, int dpi, int pixel_type,
     height = g.pixel_ys;
     size = (size_t)width * (size_t)height * (size_t)bpp;
     if (size / (size_t)width / (size_t)bpp != (size_t)height) {
-        set_error("Desbordamiento de imagen real: %dx%d", width, height);
+        set_error("Real image overflow: %dx%d", width, height);
         return GT68XX_ERR_IO;
     }
     line_bytes = g.scan_bpl * 3;
 
-    /* Misma curva que SANE para 8 bits y gamma 2.0 (gt68xx.c). */
+    /* Same curve as SANE for 8-bit and gamma 2.0 (gt68xx.c). */
     for (i = 0; i < 256; i++) {
         int v = (int)(255.0 * sqrt(((double)i + 1.0) / 256.0) + 0.5);
         if (v < 0) v = 0;
@@ -718,23 +718,23 @@ static int gt68xx_scan_real(gt68xx_device *dev, int dpi, int pixel_type,
     out = (uint8_t *)malloc(size);
     line = (uint8_t *)malloc((size_t)line_bytes);
     if (!out || !line) {
-        set_error("Sin memoria para imagen real (%lu bytes) y linea (%d)",
+        set_error("Out of memory for real image (%lu bytes) and line (%d)",
                   (unsigned long)size, line_bytes);
         free(out);
         free(line);
         return GT68XX_ERR_NOMEM;
     }
 
-    /* gt68xx.c: stop_scan antes de posicionar, lampara encendida. */
+    /* gt68xx.c: stop_scan before positioning, lamp on. */
     (void)gt68xx_stop_scan(dev);
     if (gt68xx_lamp_control(dev, 1) != 0) {
         goto done;
     }
     Sleep(200);
 
-    /* Mover el papel al inicio del area de escaneo (A4, y0=1.5mm). */
+    /* Move paper to the start of the scan area (A4, y0=1.5mm). */
     if (gt68xx_move_paper(dev, g.abs_y0) != 0) {
-        set_error("Fallo move_paper (0x82)");
+        set_error("move_paper (0x82) failed");
         goto done;
     }
     if (gt68xx_wait_positioning(dev) != 0) {
@@ -742,22 +742,22 @@ static int gt68xx_scan_real(gt68xx_device *dev, int dpi, int pixel_type,
     }
 
     if (gt68xx_setup_scan(dev, &g) != 0) {
-        set_error("Fallo setup_scan (0x20)");
+        set_error("setup_scan (0x20) failed");
         goto done;
     }
-    /* SANE omite la exposicion en escaneres sheet-fed sin calibrar; el
-     * firmware ya trae 0x157. No abortamos si el comando falla. */
+    /* SANE skips exposure on uncalibrated sheet-fed scanners; the firmware
+     * already has 0x157. Do not abort if the command fails. */
     (void)gt68xx_set_exposure(dev);
     if (gt68xx_set_afe(dev) != 0) {
-        set_error("Fallo set_afe (0x22)");
+        set_error("set_afe (0x22) failed");
         goto done;
     }
     if (gt68xx_start_scan(dev) != 0) {
-        set_error("Fallo start_scan (0x43)");
+        set_error("start_scan (0x43) failed");
         goto done;
     }
 
-    /* gt68xx_scanner_internal_start_scan: 30s maximo esperando 0x35. */
+    /* gt68xx_scanner_internal_start_scan: wait up to 30s for 0x35. */
     for (i = 0; i < 3000; i++) {
         if (gt68xx_read_ready(dev, &ready) != 0) {
             goto done;
@@ -768,7 +768,7 @@ static int gt68xx_scan_real(gt68xx_device *dev, int dpi, int pixel_type,
         Sleep(10);
     }
     if (!ready) {
-        set_error("El escaner no esta listo para transferir (0x35)");
+        set_error("The scanner is not ready to transfer (0x35)");
         goto done;
     }
 
@@ -778,7 +778,7 @@ static int gt68xx_scan_real(gt68xx_device *dev, int dpi, int pixel_type,
         uint8_t *r;
 
         if (gt68xx_bulk_read_exact(dev, line, line_bytes) != 0) {
-            set_error("Fallo leyendo la linea %d/%d", y, height);
+            set_error("Failed reading line %d/%d", y, height);
             goto done;
         }
         b = line;
@@ -794,7 +794,7 @@ static int gt68xx_scan_real(gt68xx_device *dev, int dpi, int pixel_type,
         } else {
             for (x = 0; x < width; x++) {
                 size_t p = (size_t)y * (size_t)width + (size_t)x;
-                /* Luma aproximada; el sensor ya entrega 8 bits por canal. */
+                /* Approximate luma; the sensor already provides 8 bits per channel. */
                 out[p] = (uint8_t)((gamma_lut[r[x]] * 77 +
                                    gamma_lut[gg[x]] * 150 +
                                    gamma_lut[b[x]] * 29) >> 8);
@@ -805,7 +805,7 @@ static int gt68xx_scan_real(gt68xx_device *dev, int dpi, int pixel_type,
 
 done:
     (void)gt68xx_stop_scan(dev);
-    /* gt68xx.c (sane_cancel) expulsa la hoja en scanners sheet-fed. */
+    /* gt68xx.c (sane_cancel) ejects the sheet on sheet-fed scanners. */
     (void)gt68xx_paperfeed(dev);
     (void)gt68xx_lamp_control(dev, 0);
     free(line);
@@ -845,24 +845,24 @@ int gt68xx_test_pattern(int dpi, int pixel_type, gt68xx_image *img)
         dpi = 600;
     }
 
-    /* Área A4 real: 210 x 297 mm. */
+    /* Real A4 area: 210 x 297 mm. */
     width = (int)((210.0 / 25.4) * dpi + 0.5);
     height = (int)((297.0 / 25.4) * dpi + 0.5);
     if (width < 1 || height < 1 || width > 20000 || height > 30000) {
-        set_error("Dimensiones de prueba invalidas: %dx%d", width, height);
+        set_error("Invalid test dimensions: %dx%d", width, height);
         return GT68XX_ERR_IO;
     }
 
     bpp = (pixel_type == GT68XX_PIXEL_RGB) ? 3 : 1;
     size = (size_t)width * (size_t)height * (size_t)bpp;
     if (size / (size_t)width / (size_t)bpp != (size_t)height) {
-        set_error("Desbordamiento de tamano de imagen");
+        set_error("Image size overflow");
         return GT68XX_ERR_IO;
     }
 
     data = (unsigned char *)malloc(size);
     if (!data) {
-        set_error("Sin memoria para la imagen de prueba (%lu bytes)",
+        set_error("Out of memory for test image (%lu bytes)",
                   (unsigned long)size);
         return GT68XX_ERR_NOMEM;
     }
@@ -879,7 +879,7 @@ int gt68xx_test_pattern(int dpi, int pixel_type, gt68xx_image *img)
                 v = 230;
             }
 
-            /* Cruz central y algunas líneas de referencia. */
+            /* Center cross and some reference lines. */
             if (abs(x * 2 - width) < 2 || abs(y * 2 - height) < 2) {
                 v = 0;
             }
@@ -887,7 +887,7 @@ int gt68xx_test_pattern(int dpi, int pixel_type, gt68xx_image *img)
                 v = 80;
             }
 
-            /* Gradiente horizontal suave. */
+            /* Smooth horizontal gradient. */
             v = (v * 3 + (x * 255) / width) / 4;
 
             if (bpp == 1) {

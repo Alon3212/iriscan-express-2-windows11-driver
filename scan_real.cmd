@@ -3,32 +3,32 @@ setlocal EnableExtensions
 set "NAPS2=%ProgramFiles%\NAPS2\NAPS2.Console.exe"
 if not exist "%NAPS2%" set "NAPS2=%ProgramFiles(x86)%\NAPS2\NAPS2.Console.exe"
 if not exist "%NAPS2%" (
-    echo ERROR: no se encontro NAPS2.Console.exe.
-    echo Ajusta la ruta de NAPS2 32 bits en este script.
+    echo ERROR: NAPS2.Console.exe was not found.
+    echo Adjust the 32-bit NAPS2 path in this script.
     exit /b 1
 )
 
-rem Debe abrir el hardware real: limpiar cualquier modo de prueba heredado.
+rem Must open the real hardware: clear any inherited test mode.
 set "COLORUSBSCANNER_TEST_PATTERN="
 set "COLORUSBSCANNER_DEBUG=1"
 
-rem Evitar que un PDF antiguo haga parecer exitoso un escaneo fallido.
+rem Prevent an old PDF from making a failed scan look successful.
 if exist "%~dp0real_scan.pdf" del /f /q "%~dp0real_scan.pdf"
 
 "%NAPS2%" --driver twain --device "Color USB Scanner" --dpi 300 --bitdepth color ^
           -o "%~dp0real_scan.pdf" -v
 
-rem NAPS2 puede devolver 1 por su ArgumentNullException no fatal.
+rem NAPS2 may return 1 because of its non-fatal ArgumentNullException.
 if exist "%~dp0real_scan.pdf" (
     echo.
-    echo OK: se genero "%~dp0real_scan.pdf".
-    echo Si la imagen sale mal, revisa %%TEMP%%\ColorUSBScanner.log.
+    echo OK: "%~dp0real_scan.pdf" was created.
+    echo If the image looks wrong, check %%TEMP%%\ColorUSBScanner.log.
 ) else (
     echo.
-    echo Fallo el escaneo real. Revisa:
-    echo   - Zadig 2.9: 07B3:0412 enlazado a WinUSB/libusbK.
-    echo   - libusb-1.0.dll de 32 bits junto a ColorUSBScanner.ds.
-    echo   - cism216.fw (8192 bytes) junto a ColorUSBScanner.ds.
-    echo   - %%TEMP%%\ColorUSBScanner.log con COLORUSBSCANNER_DEBUG=1.
+    echo Real scan failed. Check:
+    echo   - Zadig 2.9: 07B3:0412 bound to WinUSB/libusbK.
+    echo   - 32-bit libusb-1.0.dll next to ColorUSBScanner.ds.
+    echo   - cism216.fw (8192 bytes) next to ColorUSBScanner.ds.
+    echo   - %%TEMP%%\ColorUSBScanner.log with COLORUSBSCANNER_DEBUG=1.
     exit /b 1
 )

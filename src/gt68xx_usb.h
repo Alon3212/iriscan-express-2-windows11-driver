@@ -1,5 +1,5 @@
 /*
- * gt68xx_usb.h - capa USB mínima para el GT-6816 (Plustek OpticSlim M12)
+ * gt68xx_usb.h - minimal USB layer for the GT-6816 (Plustek OpticSlim M12)
  */
 #ifndef GT68XX_USB_H
 #define GT68XX_USB_H
@@ -17,9 +17,9 @@ extern "C" {
 typedef struct gt68xx_device {
     libusb_context       *ctx;
     libusb_device_handle *handle;
-    uint8_t               ep_in;       /* bulk IN  */
+    uint8_t               ep_in;       /* bulk IN */
     uint8_t               ep_out;      /* bulk OUT */
-    uint8_t               ep_int;      /* interrupt IN, 0 si no hay */
+    uint8_t               ep_int;      /* interrupt IN, 0 if absent */
     int                   interface_number;
     int                   configuration;
     int                   opened;
