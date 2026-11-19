@@ -1,0 +1,7 @@
+; ColorUSBScanner.def
+; Exporta el punto de entrada TWAIN sin decoración de stdcall.
+; El DS es de 32 bits: DS_Entry tiene 5 parámetros y stdcall redondea
+; cada uno a 4 bytes en la pila => 20 bytes (_DS_Entry@20).
+LIBRARY ColorUSBScanner
+EXPORTS
+    DS_Entry=_DS_Entry@20

@@ -1,0 +1,26 @@
+# Makefile mínimo para MinGW-w64 de 32 bits.
+# En Windows con MSYS2:
+#   pacman -S mingw-w64-i686-gcc
+#   make -f Makefile.mingw
+#
+# El resultado es ColorUSBScanner.ds (32 bits).
+
+CC      ?= i686-w64-mingw32-gcc
+CFLAGS  ?= -O2 -Wall -Wextra
+CPPFLAGS = -DWIN32 -D_WINDOWS -D_USRDLL -D_CRT_SECURE_NO_WARNINGS \
+           -Isrc -Ithird_party -Ithird_party/libusb
+LDFLAGS  = -shared -Wl,--kill-at
+LDLIBS   = -lkernel32 -luser32
+
+SRC = src/twain_ds.c src/libusb_dyn.c src/gt68xx_usb.c src/gt68xx_proto.c
+OUT = ColorUSBScanner.ds
+
+all: $(OUT)
+
+$(OUT): $(SRC)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $(SRC) $(LDLIBS)
+
+clean:
+	rm -f $(OUT) *.o *.a
+
+.PHONY: all clean
